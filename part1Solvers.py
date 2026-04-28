@@ -2,13 +2,13 @@ import z3
 from z3 import (Solver, Bool,Bools,Int,Ints, Or, Not, And, Implies, Xor, BitVec, BV2Int, Reals, Distinct, If)
 
 """
-Suppose we want to find a satisfying assignment for the expression (a || !b) && (!a || c). That means we’re looking for values of a, b, and c that make the entire expression evaluate to true.
+Suppose we want to find a satisfying assignment for the expression (a || !b) && (!a || c). That means we're looking for values of a, b, and c that make the entire expression evaluate to true.
 
 One way to approach this is by checking all possible combinations of truth values for a, b, and c. Since each variable can be either true or false, there are 2^3=8 possible combinations.
 
 Can you list all 8 combinations of a, b, and c?
 
-In general, for n variables, there will be 2^n possible assignments, so the approach of "trying everything" is not efficient for large n. In fact, this is the SAT ("satisfiability") problem, which is NP-complete, meaning that it is "one of the hardest problems to which solutions can be verified quickly. But this difficult problem is exactly what tools like the Z3 SMT solver! Here’s how we can solve the problem using the Z3:
+In general, for n variables, there will be 2^n possible assignments, so the approach of "trying everything" is not efficient for large n. In fact, this is the SAT ("satisfiability") problem, which is NP-complete, meaning that it is "one of the hardest problems to which solutions can be verified quickly. But this difficult problem is exactly what tools like the Z3 SMT solver! Here's how we can solve the problem using the Z3:
 """
 def boolean_expressions():
     a = Bool('a')
@@ -33,7 +33,7 @@ def boolean_expressions():
 
     But what if we want a different solution?
 
-    In this case, we can add an additional constraint that says that we don’t want the solution where a, b, and c are all false.
+    In this case, we can add an additional constraint that says that we don't want the solution where a, b, and c are all false.
     """
 
 
@@ -46,9 +46,9 @@ def boolean_expressions():
             print(f_2_model)
 
     """
-    This output says that the formula (a || !b) && (!a || c) will be true when b is false and c is true (it doesn’t matter what a is).
+    This output says that the formula (a || !b) && (!a || c) will be true when b is false and c is true (it doesn't matter what a is).
 
-    Let’s try adding one more constraint
+    Let's try adding one more constraint
     """
 
     clause_4 = (And(Not(a),b))
@@ -65,7 +65,7 @@ def boolean_expressions():
 
 
 """
-Z3 can find solutions to more than just SAT problems – it is an SMT solver.
+Z3 can find solutions to more than just SAT problems - it is an SMT solver.
 
 SMT stands for SAT modulo theories; it generalizes SAT to formulas involving integers, strings, arrays, and so on (the details of how it can do this are interesting but complicated, and we probably wont be able to get to them in class). For example, we can use Z3 to find a solution for the system of equations 3x - 2y = 1, y - x = 1.
 """
@@ -126,6 +126,8 @@ def proof_by_unsat():
     s = Solver()
 
     # TODO: YOUR CODE HERE
+    s.add(y <= 0)
+    s.add(x+y > x)
 
     match s.check():
         case z3.unsat:
@@ -144,7 +146,16 @@ def demorgans_proof():
         Print "No counterexample can be found, therefore the statement is true" if the given formula f is true, otherwise print "The formula f is false, with counterexample given by: " and the model that shows the formula to be false.
         """
         # TODO: YOUR CODE HERE
-        pass
+        s = Solver()
+        s.add(Or(Not(p), Not(q)))
+        s.add(Not(Or(Not(p), Not(q))))
+
+        match s.check():
+            case z3.unsat:
+                print("No counterexample can be found, therefore the statement is true")
+            
+            case z3.sat:
+                print(f"The formula f is false, with counterexample given by: {s.model()}")
 
     prove(demorgan)
 
