@@ -125,9 +125,9 @@ def proof_by_unsat():
     x,y = Ints('x y')
     s = Solver()
 
-    # TODO: YOUR CODE HERE
-    s.add(y <= 0)
-    s.add(x+y > x)
+    # Student Code:
+    s.add(y > 0)
+    s.add(Not(x+y > x))
 
     match s.check():
         case z3.unsat:
@@ -260,8 +260,8 @@ if __name__ == "__main__":
     #integer_overflow()
     
     proof_by_unsat()
-    demorgans_proof()
-    wedding_planning()
+    #demorgans_proof()
+    #wedding_planning()
     #sudoku(instance)
-    coin_sum(2)
+    #coin_sum(2)
     pass
