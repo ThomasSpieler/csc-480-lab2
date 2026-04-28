@@ -249,3 +249,19 @@ def coin_sum(total):
     Hint: You may need to run many related but slightly different model checks.
     """
     # TODO: YOUR CODE HERE
+
+
+
+
+if __name__ == "__main__":
+    #boolean_expressions()
+    #integer_expressions()
+    #real_artithmetic()
+    #integer_overflow()
+    
+    proof_by_unsat()
+    demorgans_proof()
+    wedding_planning()
+    #sudoku(instance)
+    coin_sum(2)
+    pass
