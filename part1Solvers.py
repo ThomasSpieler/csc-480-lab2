@@ -145,9 +145,9 @@ def demorgans_proof():
         """
         Print "No counterexample can be found, therefore the statement is true" if the given formula f is true, otherwise print "The formula f is false, with counterexample given by: " and the model that shows the formula to be false.
         """
-        # TODO: YOUR CODE HERE
+        # Student Code:
         s = Solver()
-        s.add(Or(Not(p), Not(q)))
+        s.add(Not(And(p, q)))
         s.add(Not(Or(Not(p), Not(q))))
 
         match s.check():
@@ -259,8 +259,8 @@ if __name__ == "__main__":
     #real_artithmetic()
     #integer_overflow()
     
-    proof_by_unsat()
-    #demorgans_proof()
+    #proof_by_unsat()
+    demorgans_proof()
     #wedding_planning()
     #sudoku(instance)
     #coin_sum(2)
