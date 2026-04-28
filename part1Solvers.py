@@ -147,8 +147,7 @@ def demorgans_proof():
         """
         # Student Code:
         s = Solver()
-        s.add(Not(And(p, q)))
-        s.add(Not(Or(Not(p), Not(q))))
+        s.add(Not(f))
 
         match s.check():
             case z3.unsat:
