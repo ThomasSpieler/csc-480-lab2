@@ -185,7 +185,11 @@ def wedding_planning():
     or
         "There is no acceptable seating arraignment"
     """
-    #TODO: YOUR CODE HERE
+    # Student code:
+    a, b, c = Ints('a b c')
+    s = Solver()
+
+
 
 
 
