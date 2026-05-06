@@ -315,7 +315,24 @@ def coin_sum(total):
 
     Hint: You may need to run many related but slightly different model checks.
     """
-    # TODO: YOUR CODE HERE
+    # Student Code
+    p, n, d, q, h, f = Ints('p n d q h f')
+    s = Solver()
+
+    # Bounds
+    s.add(p>=0, n>=0, d>=0, q>=0, h>=0, f>=0)
+
+    # Total
+    s.add(p + 5*n + 10*d + 25*q + 50*h + 100*f == total*100)
+
+    count = 0
+
+    while s.check() == z3.sat:
+        m = s.model()
+        count += 1
+        s.add(Or(p != m[p], n != m[n], d != m[d], q != m[q], h != m[h], f != m[f]))
+    
+    print(count)
 
 
 
@@ -329,6 +346,6 @@ if __name__ == "__main__":
     #proof_by_unsat()
     #demorgans_proof()
     #wedding_planning()
-    sudoku(instance)
-    #coin_sum(2)
+    #sudoku(instance)
+    coin_sum(2)
     pass
