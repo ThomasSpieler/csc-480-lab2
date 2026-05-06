@@ -240,23 +240,59 @@ def print_sudoku(grid):
 
 
 def sudoku(puzzle):
-
     """
     Use print_sudoku to print your solution to puzzle or otherwise print "The puzzle is impossible.".
     """
-    #TODO: YOUR CODE HERE
+    #Student Code:
+    # 9x9 grid
+    Coords = [[Int(f"R{r}C{c}") for c in range(9)] for r in range(9)]
+
+    s = Solver()
+        
+    # Bounds for grid values
+    for r in range(9):
+        for c in range(9):
+            s.add(Coords[r][c] >= 1, Coords[r][c] <= 9)
+        
+    # Distinct Rows and Columns
+    for r in range(9):
+        row = Coords[r]
+        s.add(Distinct(row))
+    for c in range(9):
+        column = [Coords[r][c] for r in range(9)]
+        s.add(Distinct(column))
 
 
+    # 3x3 boxes
+    for br in range(3):
+        for bc in range(3):
+            box = [Coords[r][c] 
+                   for r in range(br*3, br*3 + 3)
+                   for c in range(bc*3, bc*3 + 3)]
+            s.add(Distinct(box))
+
+    # Given values
+    for r in range(9):
+        for c in range(9):
+            if puzzle[r][c] != 0:
+                s.add(Coords[r][c] == puzzle[r][c])
+
+    match s.check():
+        case z3.unsat:
+            print("The puzzle is impossible.")
+        
+        case z3.sat:
+            print_sudoku([[s.model()[Coords[r][c]] for c in range(9)] for r in range(9)])
 
 instance = ((0,0,0,0,9,4,0,3,0),
-            (0,0,0,5,1,0,0,0,7),
-            (0,8,9,0,0,0,0,4,0),
-            (0,0,0,0,0,0,2,0,8),
-            (0,6,0,2,0,1,0,5,0),
-            (1,0,2,0,0,0,0,0,0),
-            (0,7,0,0,0,0,5,2,0),
-            (9,0,0,0,6,5,0,0,0),
-            (0,4,0,9,7,0,0,0,0))
+        (0,0,0,5,1,0,0,0,7),
+        (0,8,9,0,0,0,0,4,0),
+        (0,0,0,0,0,0,2,0,8),
+        (0,6,0,2,0,1,0,5,0),
+        (1,0,2,0,0,0,0,0,0),
+        (0,7,0,0,0,0,5,2,0),
+        (9,0,0,0,6,5,0,0,0),
+        (0,4,0,9,7,0,0,0,0))
 
 
 
@@ -292,7 +328,7 @@ if __name__ == "__main__":
     
     #proof_by_unsat()
     #demorgans_proof()
-    wedding_planning()
-    #sudoku(instance)
+    #wedding_planning()
+    sudoku(instance)
     #coin_sum(2)
     pass
