@@ -186,9 +186,37 @@ def wedding_planning():
         "There is no acceptable seating arraignment"
     """
     # Student code:
-    a, b, c = Ints('a b c')
+    # Using: Alice = 1, Bob = 2, Charlie = 3 for seat assignments
+    guests = ['Alice', 'Bob', 'Charlie']
+    Left = Int('Left')
+    Middle = Int('Middle')
+    Right = Int('Right')
     s = Solver()
 
+    # Bounds for seating assignments
+    s.add(Left >= 1, Left <= 3)
+    s.add(Middle >= 1, Middle <= 3)
+    s.add(Right >= 1, Right <= 3)
+
+    # Each seat can only have one guest
+    s.add(Left != Middle, Middle != Right, Right != Left)
+
+    # Alice doesn't sit next to Charlie:
+    # True for: A, _, C ; C, _, A
+    s.add(Or(And(Left == 1, Right == 3), And(Left == 3, Right == 1)))
+
+    # Alice doesn't sit in the leftmost chair
+    s.add(Left != 1)
+
+    # Bob doesn't sit to the right of Charlie
+    s.add(Not(And(Left == 3, Middle == 2)))
+    s.add(Not(And(Middle == 3, Right == 2)))
+
+    match s.check():
+        case z3.unsat:
+            print("There is no acceptable seating arraignment")
+        case z3.sat:
+            print(f"{guests[s.model()[Left].as_long()-1]} sits on the left, {guests[s.model()[Middle].as_long()-1]} in the middle, and {guests[s.model()[Right].as_long()-1]} on the right.")
 
 
 
@@ -263,8 +291,8 @@ if __name__ == "__main__":
     #integer_overflow()
     
     #proof_by_unsat()
-    demorgans_proof()
-    #wedding_planning()
+    #demorgans_proof()
+    wedding_planning()
     #sudoku(instance)
     #coin_sum(2)
     pass
