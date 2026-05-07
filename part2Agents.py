@@ -36,7 +36,7 @@ class PuzzleWizard(WizardAgent):
         # Wizard location at the i-th move: (x_at_step[i], y_at_step[i])
         x_at_move = [Int(f"x_{i}") for i in range(max_moves)]
         y_at_move = [Int(f"y_{i}") for i in range(max_moves)]
-        isPartOfPath = [Bool(f"tile_{i}_in_path" for i in range(max_moves))]
+        isPartOfPath = [Bool(f"tile_{i}_in_path") for i in range(max_moves)]
 
         # ----------------------- Helpers -----------------------
         # Returns new coordinates from a transition move t (ie. up, down, left, right)
@@ -45,11 +45,11 @@ class PuzzleWizard(WizardAgent):
         
         # Uses "Cantor's Pairing Function" to encode x, y pairs as a single value (so we can add the constraint that they're distinct easily)
         def loc_id(x, y):
-            return 0.5 * (x + y) (x + y + 1) + y
+            return 0.5*(x+y)+(x+y+1)+y
         
         # Distance
         def dist(coordA, coordB):
-            return abs(coordA[0] - coordB[0] + coordA[1] - coordB[1])
+            return abs(coordA[0] - coordB[0]) + abs(coordA[1] - coordB[1])
         
         # Previous/Next move
         def get_next_index(index):
@@ -59,7 +59,7 @@ class PuzzleWizard(WizardAgent):
                 return index + 1
             
         def get_prev(x_locs, y_locs, index):
-            return (x_locs[index-1], y_locs[index+1])
+            return (x_locs[index-1], y_locs[index-1])
         
         def get_next(x_locs, y_locs, index):
             return (x_locs[get_next_index(index)], y_locs[get_next_index(index)])
@@ -76,17 +76,17 @@ class PuzzleWizard(WizardAgent):
                 case (1, 0):
                     return WizardMoves.RIGHT
                 case other:
-                    raise Exception(f"get_dir could not calculate a direction for {coordA} -> {coordB}")
+                    return 'No valid direction'
                 
         # isFire and isIce check if the current tile is a fire stone or ice stone, respectively
         def isFire(x_locs, y_locs, index):
-            if (Location(x_locs[index], y_locs[index] in fire_stones)):
+            if (Location(x_locs[index], y_locs[index]) in fire_stones):
                 return True
             else:
                 return False
             
         def isIce(x_locs, y_locs, index):
-            if (Location(x_locs[index], y_locs[index] in ice_stones)):
+            if (Location(x_locs[index], y_locs[index]) in ice_stones):
                 return True
             else:
                 return False
@@ -106,23 +106,29 @@ class PuzzleWizard(WizardAgent):
 
         # Max moves based on grid size already built into the above model
 
-        # Start at the actual starting tile:
-        s.add(x_at_move[0] == wizard_location.col)
-        s.add(y_at_move[0] == wizard_location.row)
-
         # Bounds for x and y values:
         for i in range(max_moves):
             s.add(And(x_at_move[i] >= 0, x_at_move[i] < grid_size[0]))
             s.add(And(y_at_move[i] >= 0, y_at_move[i] < grid_size[1]))
 
+        # Start at the actual starting tile:
+        s.add(x_at_move[0] == wizard_location.col)
+        s.add(y_at_move[0] == wizard_location.row)
+        s.add(isPartOfPath[0] == True)
+
+        # If a move is part of the path, the previous must be as well:
+        for i in range(1, max_moves):
+            s.add(If(isPartOfPath[i], isPartOfPath[i-1] == True, True))
+
         # Each tile only visited once:
+        # TODO: Possible cause of failure
         s.add(Distinct([loc_id(x_at_move[i], y_at_move[i]) for i in range(max_moves)]))
 
         # Each move must only travel one square of distance
         for i in range(max_moves - 1):
             initial = (x_at_move[i], y_at_move[i])
             final = (x_at_move[i+1], y_at_move[i+1])
-            s.add(dist(initial, final) == 1)
+            s.add(If(isPartOfPath[i], dist(initial, final) == 1, True))
 
         # Fire Stone Constraint:
         # If current is a fire stone, this move should be a turn and the previous and next moves should be straight
@@ -148,12 +154,18 @@ class PuzzleWizard(WizardAgent):
         
         # Every stone must be visited
         for loc in fire_stones + ice_stones:
-            s.add(Or(*[And(x_at_move[i] == loc.col, x_at_move[i] == loc.row) for i in range(max_moves)]))
+            s.add(Or([And(x_at_move[i] == loc.col, y_at_move[i] == loc.row, isPartOfPath[i]) for i in range(max_moves)]))
 
         if s.check() == z3.unsat:
             print("No solution found.")
         else:
-            pass
+            m = s.model()
+            # find last used index
+            last_used = 0
+            for i in range(max_moves):
+                if isPartOfPath[i]:
+                    last_used = i
+            return [get_dir(path[i], path[i+1]) for i in range(len(last_used)-1)]
 
 
 
