@@ -347,5 +347,5 @@ if __name__ == "__main__":
     #demorgans_proof()
     #wedding_planning()
     #sudoku(instance)
-    coin_sum(2)
+    #coin_sum(2)
     pass
